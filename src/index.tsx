@@ -1,14 +1,9 @@
-import React from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { createGlobalStyle } from 'styled-components';
-import ReactDOM from 'react-dom';
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom";
+import { QueryClient, QueryClientProvider } from "react-query";
 
-const GlobalStyles = createGlobalStyle`
-  body {
-    margin: 0;
-  }
-`;
+import App from "./App";
+import GlobalStyles from "./styles/globalStyles";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -20,5 +15,5 @@ ReactDOM.render(
       <App />
     </QueryClientProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
