@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useQuery } from "react-query";
-import fetchNearbyPlaces from "./api";
+import { fetchNearbyPlaces, fetchWeather } from "./api";
 import {
   GoogleMap,
   Marker,
@@ -10,11 +10,14 @@ import {
 import { containerStyle, center, options } from "./settings";
 import { Wrapper, LoadingView } from "./App.styles";
 import beerIcon from "./images/beer.svg";
-import { MarkerType } from "./api.models";
+import { MarkerType } from "./models";
 
 const App: React.FC = () => {
   const [clickedPos, setClickedPos] = useState<google.maps.LatLngLiteral>(
     {} as google.maps.LatLngLiteral
+  );
+  const [selectedMarker, setSelectedMarker] = useState<MarkerType>(
+    {} as MarkerType
   );
 
   const { isLoaded } = useJsApiLoader({
@@ -37,6 +40,16 @@ const App: React.FC = () => {
     }
   );
 
+  const {
+    data: markerWeather,
+    isLoading: isLoadingMarkerWeather,
+    isError: isErrorMarkerWeather,
+  } = useQuery([selectedMarker.id], () => fetchWeather(selectedMarker), {
+    enabled: !!selectedMarker.id,
+    refetchOnWindowFocus: false,
+    staleTime: 60 * 1000 * 5, // 5 minutes  timeframe
+  });
+
   const onLoad = (map: google.maps.Map<Element>): void => {
     mapRef.current = map;
   };
@@ -47,9 +60,10 @@ const App: React.FC = () => {
 
   const onMapClick = (e: google.maps.MapMouseEvent) => {
     setClickedPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+    setSelectedMarker({} as MarkerType);
   };
 
-  const onMarkerClick = (marker: MarkerType) => console.log(marker);
+  const onMarkerClick = (marker: MarkerType) => setSelectedMarker(marker);
 
   if (!isLoaded) return <div>Map loading...</div>;
 
@@ -78,6 +92,24 @@ const App: React.FC = () => {
             }}
           />
         ))}
+        {selectedMarker.location && (
+          <InfoWindow
+            position={selectedMarker.location}
+            onCloseClick={() => setSelectedMarker({} as MarkerType)}
+          >
+            <div>
+              <h3> {selectedMarker.name} </h3>
+              {isLoadingMarkerWeather ? (
+                <p>Loading weather ...</p>
+              ) : (
+                <>
+                  <p>{markerWeather?.text}</p>
+                  <p>{markerWeather?.temp} &#xb0;C</p>
+                </>
+              )}
+            </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
     </Wrapper>
   );

@@ -1,9 +1,9 @@
-import { MarkerType } from "./api.models";
+import { MarkerType, WeatherType } from "./models";
 
 const PLACE_RADIUS = 2500; // in meters
 const TYPE = "bar";
 
-const fetchNearbyPlaces = async (
+export const fetchNearbyPlaces = async (
   lat: number,
   lng: number
 ): Promise<MarkerType[]> => {
@@ -26,4 +26,27 @@ const fetchNearbyPlaces = async (
   return data.results;
 };
 
-export default fetchNearbyPlaces;
+export const fetchWeather = async (
+  marker: MarkerType
+): Promise<WeatherType> => {
+  const response = await fetch(
+    `https://yahoo-weather5.p.rapidapi.com/weather?lat=${marker.location.lat}&long=${marker.location.lng}&format=json&u=c`,
+    {
+      method: "GET",
+      headers: {
+        "x-rapidapi-key": process.env.REACT_APP_API_KEY!,
+        "x-rapidapi-host": "yahoo-weather5.p.rapidapi.com",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Oh no! something went wrong.");
+  }
+
+  const data = await response.json();
+  return {
+    temp: data.current_observation.condition.temperature,
+    text: data.current_observation.condition.text,
+  };
+};

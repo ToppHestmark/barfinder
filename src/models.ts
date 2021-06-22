@@ -5,3 +5,8 @@ export type MarkerType = {
   phone_number: string;
   website: string;
 };
+
+export type WeatherType = {
+  temp: number;
+  text: string;
+};
