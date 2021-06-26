@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useQuery } from "react-query";
+import CurrentLocation from "./components/CurrentLocation";
 import { fetchNearbyPlaces, fetchWeather } from "./api";
 import {
   GoogleMap,
@@ -50,6 +51,14 @@ const App: React.FC = () => {
     staleTime: 60 * 1000 * 5, // 5 minutes  timeframe
   });
 
+  const moveTo = (position: google.maps.LatLngLiteral) => {
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat: position.lat, lng: position.lng });
+      mapRef.current.setZoom(12);
+      setClickedPos(position);
+    }
+  };
+
   const onLoad = (map: google.maps.Map<Element>): void => {
     mapRef.current = map;
   };
@@ -69,6 +78,7 @@ const App: React.FC = () => {
 
   return (
     <Wrapper>
+      <CurrentLocation moveTo={moveTo} />
       <GoogleMap
         mapContainerStyle={containerStyle}
         options={options as google.maps.MapOptions}
